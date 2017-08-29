@@ -13,7 +13,6 @@ var MOLECULE_DEF={
 /* argument is object array from MOLECULE_DEF */
 function moleculeMake(name,molDef,scale)
 {
-    console.log('moleculeMake() ' +name);
     var mol={};
     var xCM=0;
     var yCM=0;
@@ -38,9 +37,13 @@ function moleculeMake(name,molDef,scale)
         var mass=ATOM_DEF[molDef[i].atom].mass;
         var name=ATOM_DEF[molDef[i].atom].name;
         var color=ATOM_DEF[molDef[i].atom].color;
-        var r=ATOM_DEF[molDef[i].atom].r*scale;        
+        var r=ATOM_DEF[molDef[i].atom].r*scale; 
+        /* with CM calcs - Physics.js issues ? */       
         var x=-xCM+molDef[i].x*scale;
         var y=-yCM+molDef[i].y*scale;
+        /* checking without CM calcs */
+        var x=molDef[i].x*scale;
+        var y=molDef[i].y*scale;
         mol['atom'].push({x:x,y:y,r:r,mass:mass,name:name,color:color});
     }
     return mol;
@@ -89,8 +92,6 @@ function moleculeDraw(mol,ctx)
 function moleculeSetAngle(mol,angle)
 {
     mol.angle=angle;
-    //console.log('moleculeSetAngle(angle)');
-    //console.log(mol);
     return mol;
 }
 
@@ -99,8 +100,6 @@ function moleculeSetPosition(mol,x,y)
 {
     mol.pos.x=x;
     mol.pos.y=y;
-    console.log('moleculeSetSpeed(mol,max)');
-    //console.log(mol);
     return mol;
 }
 

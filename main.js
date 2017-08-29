@@ -81,11 +81,8 @@ function step(timestamp)
 
 function collision(data) 
 {
-    console.log('collision');
     for(var i=0;i<data.collisions.length;i++)
     {
-        //console.log('collision');
-        //if(data.collisions[i].bodyB==circle1)
-        //if(data.collisions[i].bodyB==ball[2].physics && data.collisions[i].bodyA==ball[1].physics || data.collisions[i].bodyA==ball[2].physics && data.collisions[i].bodyB==ball[1].physics ) {
+        reactionProcessCollision(data.collisions[i],WORLD,CANVAS,MAX_SPEED);
     }
 }
