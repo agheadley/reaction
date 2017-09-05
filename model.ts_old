@@ -1,0 +1,21 @@
+
+class Molecule
+{
+    H;
+    I;
+    HI;
+    H2;
+    I2;
+
+    constructor()
+    {
+        this.H={name:'H',mass:1,r:1,color:'White'};
+        this.I={name:'H',mass:4,r:2,color:'DarkViolet'};
+        
+        this.HI=[{atom:this.H,x:-this.H.r,y:0},{atom:this.I,x:this.I.r,y:0}];
+        this.H2=[{atom:this.H,x:-this.H.r,y:0},{atom:this.H,x:this.H.r,y:0}];
+        this.I2=[{atom:this.I,x:-this.I.r,y:0},{atom:this.I,x:this.I.r,y:0}];
+
+    }
+
+}

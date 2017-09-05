@@ -1,0 +1,40 @@
+var Physics;    /* for physics.js library */
+
+class PhysicsJS
+{
+    world:any;
+
+    constructor(canvas) 
+    {
+        /* global world */
+        this.world=Physics({timestep:1000.0/160,maxIPF:16,integrator:'verlet'});
+        var gravity=Physics.behavior('constant-acceleration',{x:0,y:0.004}); //default
+        gravity.setAcceleration({x:0,y:0});
+        this.world.add(gravity);
+        /* add borders */
+        var bounds=Physics.aabb(0, 0, canvas.width, canvas.height)
+        var viewPort=Physics.behavior('edge-collision-detection', {aabb:bounds,restitution: 1.0,cof: 1.0});
+        this.world.add(viewPort);
+        /* detect and respond to collisions */
+        this.world.add(Physics.behavior('body-impulse-response'));
+        this.world.add(Physics.behavior('body-collision-detection'));
+        this.world.add(Physics.behavior('sweep-prune'));
+        
+
+    }
+
+    createTestBody=()=>
+    {
+        //test
+        let  options={width:50,height:25,x:250,y:300,vx:0.2,vy:0.3,cof:0,restitution:1.0};
+        let rec1= Physics.body('rectangle',options);
+        this.world.add(rec1);
+        options={width:50,height:25,x:100,y:400,vx:-0.2,vy:0.3,cof:0,restitution:1.0};
+        let rec2= Physics.body('rectangle',options);
+        this.world.add(rec2);
+
+        return [rec1,rec2];
+
+    }
+
+}
