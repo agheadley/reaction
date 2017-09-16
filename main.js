@@ -2,6 +2,9 @@ var Physics;
 var g_world;
 var g_canvas;
 var g_ctx;
+var g_graph;
+var g_maxTime = 120000; /* max time for graph plot in ms */
+var g_plot;
 var g_animationID;
 var g_startTime;
 var g_molecule;
@@ -11,17 +14,36 @@ var g_mol_HI = [{ atom: g_atom_H, x: -g_atom_H.r, y: 0 }, { atom: g_atom_I, x: g
 var g_mol_H2 = [{ atom: g_atom_H, x: -g_atom_H.r, y: 0 }, { atom: g_atom_H, x: g_atom_H.r, y: 0 }];
 var g_mol_I2 = [{ atom: g_atom_I, x: -g_atom_I.r, y: 0 }, { atom: g_atom_I, x: g_atom_I.r, y: 0 }];
 var g_reaction = {
-    initial: [{ name: 'HI', data: g_mol_HI, total: 8 }, { name: 'H2', data: g_mol_H2, total: 8 }, { name: 'I2', data: g_mol_I2, total: 8 }],
+    initial: [{ name: 'HI', data: g_mol_HI, total: 0, plot: 'LawnGreen ' }, { name: 'H2', data: g_mol_H2, total: 30, plot: 'LightCoral' }, { name: 'I2', data: g_mol_I2, total: 30, plot: 'LightCoral' }],
     rule: [
-        { A: 'H2', B: 'I2', speed: 0.3, result: ['HI', 'HI'] },
-        { A: 'HI', B: 'HI', speed: 0.4, result: ['I2', 'H2'] }
+        { A: 'H2', B: 'I2', speed: 0.2, result: ['HI', 'HI'] },
+        { A: 'HI', B: 'HI', speed: 0.5, result: ['I2', 'H2'] }
     ],
-    speed: 0.2,
-    scale: 5,
+    speed: 0.1,
+    scale: 4,
     width: 500,
     height: 400,
-    activeCollision: []
+    activeCollision: [],
+    temp: [200, 300, 400, 500, 600],
+    pressure: [1, 1.5, 2, 2.5]
 };
+function plotGraph(time) {
+    var x = g_graph.width * time / g_maxTime;
+    var yMax = 0;
+    for (var plot = 0; plot < g_reaction.initial.length; plot++)
+        yMax += g_reaction.initial[plot].total;
+    for (var plot = 0; plot < g_reaction.initial.length; plot++) {
+        var color = g_reaction.initial[plot].plot;
+        var nameText = g_reaction.initial[plot].name;
+        var count = 0;
+        for (var i = 0; i < g_molecule.length; i++)
+            if (g_molecule[i].name == nameText)
+                count++;
+        g_plot.fillStyle = color;
+        var y = g_graph.height - (g_graph.height * count / yMax);
+        g_plot.fillRect(x, y, 2, 2);
+    }
+}
 /* reaction results ? collision between g_molecule[a] and g_molecule[b] results in a reaction */
 function processCollision(a, b) {
     var inlist = [];
@@ -34,7 +56,7 @@ function processCollision(a, b) {
             vel = g_molecule[b].physics.state.vel.values();
             speed += Math.sqrt(vel.x * vel.x + vel.y * vel.y);
             if (speed > g_reaction.rule[i].speed) {
-                console.log('successful reaction  ...  ' + a + ':' + g_molecule[a].name + '   ' + b + ':' + g_molecule[b].name + ' speed :' + speed);
+                //console.log('successful reaction  ...  '+a+':'+g_molecule[a].name+'   '+b+':'+g_molecule[b].name+' speed :'+speed);
                 outlist.push(a);
                 outlist.push(b);
                 for (var j = 0; j < g_reaction.rule[i].result.length; j++)
@@ -67,9 +89,9 @@ function collision(data) {
         for (var i = 0; i < data_1.outIndex.length; i++)
             removal.push(data_1.outIndex[i]);
     }
-    console.log('Reaction...');
-    console.log('adding ...', addition);
-    console.log('removing ...', removal);
+    //console.log('Reaction...');
+    //console.log('adding ...',addition);
+    //console.log('removing ...',removal);
     /* sort reverse order so that splicing does not remove the wrong indecies */
     removal.sort(function (a, b) { return b - a; });
     /* remove body from Physics and remove g_molecule entry */
@@ -130,7 +152,7 @@ function step(timestamp) {
     }
     /* render any active collision markers */
     var removal = [];
-    console.log(g_reaction.activeCollision);
+    //console.log(g_reaction.activeCollision);
     for (var i = 0; i < g_reaction.activeCollision.length; i++) {
         if (g_reaction.activeCollision[i].time == 0)
             g_reaction.activeCollision[i].time = timestamp;
@@ -143,6 +165,8 @@ function step(timestamp) {
     removal.sort(function (a, b) { return b - a; });
     for (var i = 0; i < removal.length; i++)
         g_reaction.activeCollision.splice(removal[i], 1);
+    /* plot graph */
+    plotGraph(progress);
     /* end animation code */
     g_animationID = window.requestAnimationFrame(step);
 }
@@ -151,6 +175,14 @@ function init() {
     g_startTime = undefined;
     /* setup physics */
     initWorld();
+    /* clear graph */
+    g_plot.clearRect(0, 0, g_graph.width, g_graph.height);
+    g_plot.fillStyle = 'LightCoral';
+    g_plot.fillRect(g_graph.width - 100, 10, 10, 10);
+    g_plot.fillText("Reactants", g_graph.width - 80, 20);
+    g_plot.fillStyle = 'LawnGreen';
+    g_plot.fillRect(g_graph.width - 100, 30, 10, 10);
+    g_plot.fillText("Products", g_graph.width - 80, 40);
     /* add molecules to world, using initial conditions */
     var initial = g_reaction.initial;
     g_molecule = [];
@@ -185,7 +217,7 @@ function createMolecule(nameText, data) {
     }
     cmx = cmx / mass;
     cmy = cmy / mass;
-    console.log(cmx, cmy);
+    //console.log(cmx,cmy);
     var child = [];
     var atomData = [];
     for (var i = 0; i < data.length; i++) {
@@ -209,7 +241,7 @@ function createMolecule(nameText, data) {
     g_world.add(physics);
     molecule.physics = physics;
     molecule.atom = atomData;
-    console.log(molecule);
+    //console.log(molecule);
     return molecule;
 }
 function initWorld() {
@@ -242,10 +274,35 @@ function resizeCanvas(w, h) {
     g_reaction.height = h;
     g_canvas.width = w;
     g_canvas.height = h;
-    init();
 }
 function changePressure(direction) {
-    document.getElementById('pValue').innerHTML = '200';
+    var p = Number(document.getElementById('pValue').innerHTML);
+    var index = g_reaction.pressure.indexOf(p);
+    console.log('Pressure : ' + p + ' index: ' + index);
+    if (direction == 1 && (index + 1) < g_reaction.pressure.length)
+        index++;
+    if (direction == -1 && (index - 1) >= 0)
+        index--;
+    var indexText = '' + g_reaction.pressure[index];
+    document.getElementById('pValue').innerHTML = '' + indexText;
+    p = Number(document.getElementById('pValue').innerHTML);
+    resizeCanvas(g_canvas.width, g_canvas.width * 0.8 / p);
+    init();
+}
+function changeTemperature(direction) {
+    var t = Number(document.getElementById('tValue').innerHTML);
+    var index = g_reaction.temp.indexOf(t);
+    console.log('Temperature : ' + t + ' index: ' + index);
+    if (direction == 1 && (index + 1) < g_reaction.temp.length)
+        index++;
+    if (direction == -1 && (index - 1) >= 0)
+        index--;
+    var indexText = '' + g_reaction.temp[index];
+    document.getElementById('tValue').innerHTML = '' + indexText;
+    t = Number(document.getElementById('tValue').innerHTML);
+    t = t / 2000;
+    g_reaction.speed = t;
+    init();
 }
 window.onload = function () {
     main('canvas');
@@ -255,6 +312,8 @@ function main(id) {
     g_canvas.width = g_reaction.width;
     g_canvas.height = g_reaction.height;
     g_ctx = g_canvas.getContext('2d');
+    g_graph = document.getElementById('graph');
+    g_plot = g_graph.getContext('2d');
     init();
 }
 //# sourceMappingURL=main.js.map

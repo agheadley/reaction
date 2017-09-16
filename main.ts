@@ -2,6 +2,9 @@ var Physics:any;
 var g_world:any;  
 var g_canvas:HTMLCanvasElement;
 var g_ctx:CanvasRenderingContext2D;
+var g_graph:HTMLCanvasElement;
+var g_maxTime:number=120000; /* max time for graph plot in ms */
+var g_plot:CanvasRenderingContext2D;
 var g_animationID:any;
 var g_startTime:number;
 
@@ -16,18 +19,42 @@ var g_mol_I2=[{atom:g_atom_I,x:-g_atom_I.r,y:0},{atom:g_atom_I,x:g_atom_I.r,y:0}
 
 
 var g_reaction={
-    initial:[{name:'HI',data:g_mol_HI,total:8},{name:'H2',data:g_mol_H2,total:8},{name:'I2',data:g_mol_I2,total:8}],
+    initial:[{name:'HI',data:g_mol_HI,total:0,plot:'LawnGreen '},{name:'H2',data:g_mol_H2,total:30,plot:'LightCoral'},{name:'I2',data:g_mol_I2,total:30,plot:'LightCoral'}],
     rule:[
-        {A:'H2',B:'I2',speed:0.3,result:['HI','HI']},
-        {A:'HI',B:'HI',speed:0.4,result:['I2','H2']}
+        {A:'H2',B:'I2',speed:0.2,result:['HI','HI']},
+        {A:'HI',B:'HI',speed:0.5,result:['I2','H2']}
     ],
-    speed:0.2,
-    scale:5,
+    speed:0.1,
+    scale:4,
     width:500,
     height:400,
-    activeCollision:[]
+    activeCollision:[],
+    temp:[200,300,400,500,600],
+    pressure:[1,1.5,2,2.5]
 };
 
+function plotGraph(time)
+{
+    
+    let x=g_graph.width*time/g_maxTime;
+
+    let yMax=0;
+    for(let plot=0;plot<g_reaction.initial.length;plot++) yMax+=g_reaction.initial[plot].total;
+    
+    
+    for(let plot=0;plot<g_reaction.initial.length;plot++)
+    {
+        let color=g_reaction.initial[plot].plot;
+        let nameText=g_reaction.initial[plot].name;
+        let count=0;
+        for(let i=0;i<g_molecule.length;i++) if(g_molecule[i].name==nameText) count++;
+        g_plot.fillStyle=color;
+        let y=g_graph.height-(g_graph.height*count/yMax);
+        g_plot.fillRect(x,y,2,2);
+    }
+
+
+}
 
 /* reaction results ? collision between g_molecule[a] and g_molecule[b] results in a reaction */
 function processCollision(a,b)
@@ -45,7 +72,7 @@ function processCollision(a,b)
             speed+=Math.sqrt(vel.x*vel.x+vel.y*vel.y);
             if(speed>g_reaction.rule[i].speed)
             {
-                console.log('successful reaction  ...  '+a+':'+g_molecule[a].name+'   '+b+':'+g_molecule[b].name+' speed :'+speed);
+                //console.log('successful reaction  ...  '+a+':'+g_molecule[a].name+'   '+b+':'+g_molecule[b].name+' speed :'+speed);
                 outlist.push(a);
                 outlist.push(b);
                 for(let j=0;j<g_reaction.rule[i].result.length;j++) inlist.push(g_reaction.rule[i].result[j]);
@@ -82,9 +109,9 @@ function collision(data)
         
     }
 
-    console.log('Reaction...');
-    console.log('adding ...',addition);
-    console.log('removing ...',removal);
+    //console.log('Reaction...');
+    //console.log('adding ...',addition);
+    //console.log('removing ...',removal);
 
     /* sort reverse order so that splicing does not remove the wrong indecies */
     removal.sort(function(a, b){return b-a});
@@ -175,7 +202,7 @@ function step(timestamp)
 
     /* render any active collision markers */
     let removal=[];
-    console.log(g_reaction.activeCollision);
+    //console.log(g_reaction.activeCollision);
     for(let i=0;i<g_reaction.activeCollision.length;i++)
     {
         if(g_reaction.activeCollision[i].time==0) g_reaction.activeCollision[i].time=timestamp;
@@ -186,6 +213,8 @@ function step(timestamp)
     removal.sort(function(a, b){return b-a});
     for(let i=0;i<removal.length;i++) g_reaction.activeCollision.splice(removal[i],1);
 
+    /* plot graph */
+    plotGraph(progress);
 
     
     /* end animation code */
@@ -199,6 +228,16 @@ function init()
 
     /* setup physics */
     initWorld();
+
+    /* clear graph */
+    g_plot.clearRect(0,0,g_graph.width,g_graph.height);
+    
+    g_plot.fillStyle='LightCoral';
+    g_plot.fillRect(g_graph.width-100,10,10,10);
+    g_plot.fillText("Reactants",g_graph.width-80,20);
+    g_plot.fillStyle='LawnGreen';
+    g_plot.fillRect(g_graph.width-100,30,10,10);
+    g_plot.fillText("Products",g_graph.width-80,40);
 
     /* add molecules to world, using initial conditions */
     let initial=g_reaction.initial;
@@ -246,7 +285,7 @@ function createMolecule(nameText,data)
     cmx=cmx/mass;
     cmy=cmy/mass;
     
-    console.log(cmx,cmy);
+    //console.log(cmx,cmy);
 
     let child=[];
     let atomData=[];
@@ -280,7 +319,7 @@ function createMolecule(nameText,data)
 
     molecule.physics=physics;
     molecule.atom=atomData;
-    console.log(molecule);
+    //console.log(molecule);
 
     return molecule;
 
@@ -324,12 +363,42 @@ function resizeCanvas(w,h)
     g_reaction.height=h;
     g_canvas.width=w;
     g_canvas.height=h;
-    init();
+    
 }
 
 function changePressure(direction)
 {
-    document.getElementById('pValue').innerHTML='200';
+    let p=Number(document.getElementById('pValue').innerHTML);
+    let index=g_reaction.pressure.indexOf(p);
+    console.log('Pressure : '+p+' index: '+index);
+
+    if(direction==1 && (index+1)<g_reaction.pressure.length) index++;
+    if(direction==-1 && (index-1)>=0) index--;
+    let indexText=''+g_reaction.pressure[index];
+    document.getElementById('pValue').innerHTML=''+indexText;
+
+    p=Number(document.getElementById('pValue').innerHTML);
+    resizeCanvas(g_canvas.width,g_canvas.width*0.8/p);
+    init();
+
+}
+
+function changeTemperature(direction)
+{
+    let t=Number(document.getElementById('tValue').innerHTML);
+    let index=g_reaction.temp.indexOf(t);
+    console.log('Temperature : '+t+' index: '+index);
+
+    if(direction==1 && (index+1)<g_reaction.temp.length) index++;
+    if(direction==-1 && (index-1)>=0) index--;
+    let indexText=''+g_reaction.temp[index];
+    document.getElementById('tValue').innerHTML=''+indexText;
+
+    t=Number(document.getElementById('tValue').innerHTML);
+    t=t/2000;
+    g_reaction.speed=t;
+    init();
+
 }
 
 
@@ -342,8 +411,12 @@ function main(id)
     g_canvas=<HTMLCanvasElement>document.getElementById(id);
     g_canvas.width=g_reaction.width;
     g_canvas.height=g_reaction.height;
+    g_ctx=g_canvas.getContext('2d');
     
-    g_ctx=g_canvas.getContext('2d');    
+    g_graph=<HTMLCanvasElement>document.getElementById('graph');
+    g_plot=g_graph.getContext('2d');
+
+    
 
     init();
 }
