@@ -14,7 +14,7 @@ var g_mol_HI = [{ atom: g_atom_H, x: -g_atom_H.r, y: 0 }, { atom: g_atom_I, x: g
 var g_mol_H2 = [{ atom: g_atom_H, x: -g_atom_H.r, y: 0 }, { atom: g_atom_H, x: g_atom_H.r, y: 0 }];
 var g_mol_I2 = [{ atom: g_atom_I, x: -g_atom_I.r, y: 0 }, { atom: g_atom_I, x: g_atom_I.r, y: 0 }];
 var g_reaction = {
-    initial: [{ name: 'HI', data: g_mol_HI, total: 0, plot: 'LawnGreen ' }, { name: 'H2', data: g_mol_H2, total: 30, plot: 'LightCoral' }, { name: 'I2', data: g_mol_I2, total: 30, plot: 'LightCoral' }],
+    initial: [{ name: 'HI', data: g_mol_HI, total: 0, plot: 'LawnGreen ' }, { name: 'H2', data: g_mol_H2, total: 30, plot: 'LightCoral' }, { name: 'I2', data: g_mol_I2, total: 30, plot: 'LightPink' }],
     rule: [
         { A: 'H2', B: 'I2', speed: 0.2, result: ['HI', 'HI'] },
         { A: 'HI', B: 'HI', speed: 0.5, result: ['I2', 'H2'] }
@@ -25,7 +25,8 @@ var g_reaction = {
     height: 400,
     activeCollision: [],
     temp: [200, 300, 400, 500, 600],
-    pressure: [1, 1.5, 2, 2.5]
+    pressure: [1, 1.5, 2, 2.5],
+    amount: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
 };
 function plotGraph(time) {
     var x = g_graph.width * time / g_maxTime;
@@ -179,10 +180,13 @@ function init() {
     g_plot.clearRect(0, 0, g_graph.width, g_graph.height);
     g_plot.fillStyle = 'LightCoral';
     g_plot.fillRect(g_graph.width - 100, 10, 10, 10);
-    g_plot.fillText("Reactants", g_graph.width - 80, 20);
-    g_plot.fillStyle = 'LawnGreen';
+    g_plot.fillText("Reactant 1", g_graph.width - 80, 20);
+    g_plot.fillStyle = 'LightPink';
     g_plot.fillRect(g_graph.width - 100, 30, 10, 10);
-    g_plot.fillText("Products", g_graph.width - 80, 40);
+    g_plot.fillText("Reactant 2", g_graph.width - 80, 40);
+    g_plot.fillStyle = 'LawnGreen';
+    g_plot.fillRect(g_graph.width - 100, 50, 10, 10);
+    g_plot.fillText("Product", g_graph.width - 80, 60);
     /* add molecules to world, using initial conditions */
     var initial = g_reaction.initial;
     g_molecule = [];
@@ -302,6 +306,24 @@ function changeTemperature(direction) {
     t = Number(document.getElementById('tValue').innerHTML);
     t = t / 2000;
     g_reaction.speed = t;
+    init();
+}
+function changeAmount(name, direction) {
+    var a = Number(document.getElementById(name + 'Value').innerHTML);
+    var index = g_reaction.amount.indexOf(a);
+    console.log('Amount : ' + a + ' index: ' + index);
+    if (direction == 1 && (index + 1) < g_reaction.amount.length)
+        index++;
+    if (direction == -1 && (index - 1) >= 0)
+        index--;
+    var indexText = '' + g_reaction.amount[index];
+    document.getElementById(name + 'Value').innerHTML = '' + indexText;
+    a = Number(document.getElementById(name + 'Value').innerHTML);
+    a = a * 100;
+    for (var i = 0; i < g_reaction.initial.length; i++) {
+        if (g_reaction.initial[i].name == name)
+            g_reaction.initial[i].total = a;
+    }
     init();
 }
 window.onload = function () {

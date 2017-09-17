@@ -14,17 +14,18 @@ html, body { width:100%; height:100%; font-family:sans-serif;} /* just to be sur
 
 canvas {background-color:black;display:block; } /* To remove the scrollbars */
 
-header,footer {
+/*
+#header,#footer {
     height:10%;
     overflow:hidden;
 
 }
 
-main {
+#main {
     height:80%;
     overflow:hidden;
 }
-
+*/
 
 
 </style>
@@ -41,8 +42,8 @@ main {
 </head>
 <body>
 <div id="header">
-<p>H<sub>2</sub> (g) + I<sub>2</sub> (g) &#8652; 2HI (g)</p>
-<p><button onclick="pauseToggle()">&#9612;&#9612; /&nbsp;&#9658;&nbsp;</button></p>
+<p>H<sub>2</sub> (g) + I<sub>2</sub> (g) &#8652; 2HI (g) &nbsp;&nbsp;&#916;H = -9 kJmol<sup>-1</sup></p>
+<p><button onclick="pauseToggle()"><span style="font-size:xx-small;">&#9612;&#9612;</span> /&nbsp;&#9658;&nbsp;</button></p>
 </div>
 <p></p>
 
@@ -74,8 +75,32 @@ main {
 <td id='tValue' style="color:red;">300</td>
 <td>&nbsp;&nbsp;</td>
 <td><button onclick="changeTemperature(1);">&#9650;</button></td>
-
 </tr>
+<tr>
+    <td>H<sub>2</sub> / mol</td><td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('H2',-1);">&#9660;</button></td>
+    <td>&nbsp;&nbsp;</td>
+    <td id='H2Value' style="color:red;">0.3</td>
+    <td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('H2',1);">&#9650;</button></td>
+</tr>
+<tr>
+    <td>I<sub>2</sub> / mol</td><td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('I2',-1);">&#9660;</button></td>
+    <td>&nbsp;&nbsp;</td>
+    <td id='I2Value' style="color:red;">0.3</td>
+    <td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('I2',1);">&#9650;</button></td>
+</tr>
+<tr>
+    <td>HI / mol</td><td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('HI',-1);">&#9660;</button></td>
+    <td>&nbsp;&nbsp;</td>
+    <td id='HIValue' style="color:red;">0</td>
+    <td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('HI',1);">&#9650;</button></td>
+</tr>
+
 </table>
 </div>
 </body>
