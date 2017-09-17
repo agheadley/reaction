@@ -10,45 +10,109 @@
 
 /* * { margin:0; padding:0; } */ /* to remove the top and left whitespace */
 
-html, body { width:100%; height:100%; font-family:sans-serif;} /* just to be sure these are full screen*/
+/*
+html, body { width:100%; height:100%; font-family:sans-serif;} */ /* just to be sure these are full screen*/
 
-canvas {background-color:Gainsboro ;display:block; } /* To remove the scrollbars */
 
-header,footer {
+body {font-family:sans-serif;}
+canvas {background-color:black;display:block; } /* To remove the scrollbars */
+
+#content {
+    margin-left:auto;
+    margin-right:auto;
+    
+}
+
+/*
+#header,#footer {
     height:10%;
     overflow:hidden;
 
 }
 
-main {
+#main {
     height:80%;
     overflow:hidden;
 }
-
+*/
 
 
 </style>
 <script src="physicsjs-full.min.js"></script>
 <script src="main.js"></script>
-<script src="utility.js"></script>
-<script src="reaction.js"></script>
-<script src="molecule.js"></script>
-
 
 
 
 <script>
 
+
 </script>
 
 </head>
 <body>
-<div id="header">header</div>
+<div id="content">
+<div id="header">
+<p><b>EQUILIBRIUM : H<sub>2</sub> (g) + I<sub>2</sub> (g) &#8652; 2HI (g) &nbsp;&nbsp;&#916;H = -9 kJmol<sup>-1</sup></b></p>
+<p><button onclick="pauseToggle()"><span style="font-size:xx-small;">&#9612;&#9612;</span> /&nbsp;&#9658;&nbsp;</button></p>
+</div>
 <p></p>
-<div id="main"><canvas id="canvas" width=500 height=500 ></canvas></div>
+
+<div id="main">
+<div id="reaction" style="height:430px;">
+<p>REACTION</p>  
+<canvas id="canvas" width=500 height=500 ></canvas>
+</div>
+<p>GRAPH</p> 
+<canvas id="graph" width=500 height=100></canvas>
+</div>
 <p></p>
 <div id="footer">
-<button onclick="toggleStep();">Pause</button>
+
+<p>CONDITIONS</p>
+<table>
+<tr>
+<td>Pressure / atm</td><td>&nbsp;&nbsp;</td>
+<td><button onclick="changePressure(-1);">&#9660;</button></td>
+<td>&nbsp;&nbsp;</td>
+<td id='pValue' style="color:red;">1</td>
+<td>&nbsp;&nbsp;</td>
+<td><button onclick="changePressure(1);">&#9650;</button></td>
+</tr>
+<tr>
+<td>Temperature / K</td><td>&nbsp;&nbsp;</td>
+<td><button onclick="changeTemperature(-1);">&#9660;</button></td>
+<td>&nbsp;&nbsp;</td>
+<td id='tValue' style="color:red;">300</td>
+<td>&nbsp;&nbsp;</td>
+<td><button onclick="changeTemperature(1);">&#9650;</button></td>
+</tr>
+<tr>
+    <td>H<sub>2</sub> / mol</td><td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('H2',-1);">&#9660;</button></td>
+    <td>&nbsp;&nbsp;</td>
+    <td id='H2Value' style="color:red;">0.3</td>
+    <td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('H2',1);">&#9650;</button></td>
+</tr>
+<tr>
+    <td>I<sub>2</sub> / mol</td><td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('I2',-1);">&#9660;</button></td>
+    <td>&nbsp;&nbsp;</td>
+    <td id='I2Value' style="color:red;">0.3</td>
+    <td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('I2',1);">&#9650;</button></td>
+</tr>
+<tr>
+    <td>HI / mol</td><td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('HI',-1);">&#9660;</button></td>
+    <td>&nbsp;&nbsp;</td>
+    <td id='HIValue' style="color:red;">0</td>
+    <td>&nbsp;&nbsp;</td>
+    <td><button onclick="changeAmount('HI',1);">&#9650;</button></td>
+</tr>
+
+</table>
+</div>
 </div>
 </body>
 </html>
